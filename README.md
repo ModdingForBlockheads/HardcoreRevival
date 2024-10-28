@@ -4,15 +4,10 @@ Minecraft Mod. Help your friends back up after they die (if you can make it in t
 
 - [Modpack Permissions](https://mods.twelveiterations.com/permissions)
 
-#### Forge
+#### Downloads
 
 [![Versions](http://cf.way2muchnoise.eu/versions/274036_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/hardcore-revival)
 [![Downloads](http://cf.way2muchnoise.eu/full_274036_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/hardcore-revival)
-
-#### Fabric
-
-[![Versions](http://cf.way2muchnoise.eu/versions/554587_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/hardcore-revival-fabric)
-[![Downloads](http://cf.way2muchnoise.eu/full_554587_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/hardcore-revival-fabric)
 
 ## Contributing
 
