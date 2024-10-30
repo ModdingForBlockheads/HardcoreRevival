@@ -1,6 +1,8 @@
 package net.blay09.mods.hardcorerevival.network;
 
 import net.blay09.mods.hardcorerevival.HardcoreRevival;
+import net.blay09.mods.hardcorerevival.HardcoreRevivalManager;
+import net.blay09.mods.hardcorerevival.PlayerHardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -44,14 +46,14 @@ public class RescueMessage implements CustomPacketPayload {
     }
 
     public static void handle(ServerPlayer player, RescueMessage message) {
-        if (player == null || !player.isAlive() || player.isSpectator() || HardcoreRevival.getRevivalData(player).isKnockedOut()) {
+        if (player == null || !player.isAlive() || player.isSpectator() || PlayerHardcoreRevivalManager.isKnockedOut(player)) {
             return;
         }
 
         if (message.active) {
             final double range = HardcoreRevivalConfig.getActive().rescueDistance;
             List<Player> candidates = player.level().getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(range), p -> {
-                if (p == null || !HardcoreRevival.getRevivalData(p).isKnockedOut()) {
+                if (p == null || !PlayerHardcoreRevivalManager.isKnockedOut(p)) {
                     return false;
                 }
 
@@ -72,11 +74,11 @@ public class RescueMessage implements CustomPacketPayload {
                 }
             }
             if (target != null) {
-                HardcoreRevival.getManager().startRescue(player, target);
+                HardcoreRevivalManager.startRescue(player, target);
 
             }
         } else {
-            HardcoreRevival.getManager().abortRescue(player);
+            HardcoreRevivalManager.abortRescue(player);
         }
     }
 

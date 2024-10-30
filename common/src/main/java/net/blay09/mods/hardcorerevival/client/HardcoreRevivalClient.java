@@ -8,8 +8,7 @@ import net.blay09.mods.balm.api.event.client.FovUpdateEvent;
 import net.blay09.mods.balm.api.event.client.GuiDrawEvent;
 import net.blay09.mods.balm.api.event.client.KeyInputEvent;
 import net.blay09.mods.balm.api.event.client.OpenScreenEvent;
-import net.blay09.mods.hardcorerevival.HardcoreRevival;
-import net.blay09.mods.hardcorerevival.capability.HardcoreRevivalData;
+import net.blay09.mods.hardcorerevival.PlayerHardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.network.RescueMessage;
 import net.minecraft.client.Minecraft;
@@ -43,7 +42,7 @@ public class HardcoreRevivalClient {
 
     private static boolean isKnockedOut() {
         LocalPlayer player = Minecraft.getInstance().player;
-        return HardcoreRevival.getClientRevivalData().isKnockedOut() && player != null && player.isAlive();
+        return player != null && PlayerHardcoreRevivalManager.isKnockedOut(player) && player.isAlive();
     }
 
     public static void onOpenScreen(OpenScreenEvent event) {
@@ -61,7 +60,7 @@ public class HardcoreRevivalClient {
     public static void onGuiDrawPre(GuiDrawEvent.Pre event) {
         // Flash the health bar red if the player is knocked out
         if (event.getElement() == GuiDrawEvent.Element.HEALTH && isKnockedOut()) {
-            int knockoutTicksPassed = HardcoreRevival.getClientRevivalData().getKnockoutTicksPassed();
+            int knockoutTicksPassed = PlayerHardcoreRevivalManager.getKnockoutTicksPassed(Minecraft.getInstance().player);
             float redness = (float) Math.sin(knockoutTicksPassed / 2f);
             RenderSystem.setShaderColor(1f, 1f - redness, 1 - redness, 1f);
         }
@@ -113,11 +112,10 @@ public class HardcoreRevivalClient {
                     }
                 }
 
-                if (!HardcoreRevival.getClientRevivalData()
-                        .isKnockedOut() && mc.player != null && !mc.player.isSpectator() && mc.player.isAlive() && !isRescuing) {
+                if (!PlayerHardcoreRevivalManager.isKnockedOut(mc.player) && mc.player != null && !mc.player.isSpectator() && mc.player.isAlive() && !isRescuing) {
                     Entity pointedEntity = Minecraft.getInstance().crosshairPickEntity;
-                    if (pointedEntity != null && HardcoreRevival.getRevivalData(pointedEntity)
-                            .isKnockedOut() && mc.player.distanceTo(pointedEntity) <= HardcoreRevivalConfig.getActive().rescueDistance) {
+                    if (pointedEntity instanceof Player pointedPlayer && PlayerHardcoreRevivalManager.isKnockedOut(pointedPlayer) && mc.player.distanceTo(
+                            pointedEntity) <= HardcoreRevivalConfig.getActive().rescueDistance) {
                         Component rescueKeyText = mc.options.keyUse.getTranslatedKeyMessage();
                         var textComponent = Component.translatable("gui.hardcorerevival.hold_to_rescue", rescueKeyText);
                         guiGraphics.drawString(mc.font,
@@ -153,8 +151,7 @@ public class HardcoreRevivalClient {
                     wasKnockedOut = true;
                 }
 
-                HardcoreRevivalData revivalData = HardcoreRevival.getRevivalData(client.player);
-                revivalData.setKnockoutTicksPassed(revivalData.getKnockoutTicksPassed() + 1);
+                PlayerHardcoreRevivalManager.setKnockoutTicksPassed(client.player, PlayerHardcoreRevivalManager.getKnockoutTicksPassed(client.player) + 1);
             } else {
                 if (wasKnockedOut) {
                     Balm.getHooks().setForcedPose(client.player, null);
@@ -167,8 +164,8 @@ public class HardcoreRevivalClient {
                 }
 
                 // If right mouse is held down, and player is not in spectator mode, send rescue packet
-                if (client.options.keyUse.isDown() && !client.player.isSpectator() && client.player.isAlive() && !HardcoreRevival.getClientRevivalData()
-                        .isKnockedOut()) {
+                if (client.options.keyUse.isDown() && !client.player.isSpectator() && client.player.isAlive() && !PlayerHardcoreRevivalManager.isKnockedOut(
+                        client.player)) {
                     if (!isRescuing) {
                         Balm.getNetworking().sendToServer(new RescueMessage(true));
                         isRescuing = true;

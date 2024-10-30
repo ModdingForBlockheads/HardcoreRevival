@@ -1,6 +1,7 @@
 package net.blay09.mods.hardcorerevival.network;
 
 import net.blay09.mods.hardcorerevival.HardcoreRevival;
+import net.blay09.mods.hardcorerevival.HardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,7 @@ public class AcceptFateMessage implements CustomPacketPayload {
             return;
         }
 
-        HardcoreRevival.getManager().notRescuedInTime(player);
+        HardcoreRevivalManager.notRescuedInTime(player);
     }
 
     @Override

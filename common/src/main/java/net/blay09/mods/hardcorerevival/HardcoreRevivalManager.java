@@ -4,8 +4,6 @@ import net.blay09.mods.balm.api.Balm;
 import net.blay09.mods.hardcorerevival.api.PlayerKnockedOutEvent;
 import net.blay09.mods.hardcorerevival.api.PlayerRescuedEvent;
 import net.blay09.mods.hardcorerevival.api.PlayerRevivedEvent;
-import net.blay09.mods.hardcorerevival.capability.HardcoreRevivalData;
-import net.blay09.mods.hardcorerevival.capability.InvalidHardcoreRevivalData;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfigData;
 import net.blay09.mods.hardcorerevival.handler.KnockoutSyncHandler;
@@ -33,14 +31,8 @@ public class HardcoreRevivalManager {
     public static final ResourceKey<DamageType> NOT_RESCUED_IN_TIME = ResourceKey.create(Registries.DAMAGE_TYPE,
             ResourceLocation.fromNamespaceAndPath(HardcoreRevival.MOD_ID, "not_rescued_in_time"));
 
-    public HardcoreRevivalData getRevivalData(Player player) {
-        HardcoreRevivalData provider = Balm.getProviders().getProvider(player, HardcoreRevivalData.class);
-        return provider != null ? provider : InvalidHardcoreRevivalData.INSTANCE;
-    }
-
-    public void knockout(ServerPlayer player, DamageSource source) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        if (revivalData.isKnockedOut()) {
+    public static void knockout(ServerPlayer player, DamageSource source) {
+        if (PlayerHardcoreRevivalManager.isKnockedOut(player)) {
             return;
         }
 
@@ -48,25 +40,25 @@ public class HardcoreRevivalManager {
         player.stopRiding();
         player.removeEffect(MobEffects.REGENERATION);
 
-        revivalData.setKnockedOut(true);
-        revivalData.setKnockoutTicksPassed(0);
-        revivalData.setLastKnockoutAt(System.currentTimeMillis());
+        PlayerHardcoreRevivalManager.setKnockedOut(player, true);
+        PlayerHardcoreRevivalManager.setKnockoutTicksPassed(player, 0);
+        PlayerHardcoreRevivalManager.setLastKnockoutAt(player, System.currentTimeMillis());
         player.awardStat(ModStats.knockouts);
 
         // Punish consecutive knockouts
-        final var lastRescuedAt = revivalData.getLastRescuedAt();
+        final var lastRescuedAt = PlayerHardcoreRevivalManager.getLastRescuedAt(player);
         final var consecutiveThresholdSeconds = HardcoreRevivalConfig.getActive().consecutiveKnockoutThresholdSeconds;
         final var secondsSinceLastRescue = (System.currentTimeMillis() - lastRescuedAt) / 1000;
         final var isConsecutiveKnockout = consecutiveThresholdSeconds > 0 && lastRescuedAt > 0 && secondsSinceLastRescue <= consecutiveThresholdSeconds;
         if (isConsecutiveKnockout) {
             if (HardcoreRevivalConfig.getActive().resumeTimerOnConsecutiveKnockout) {
-                revivalData.setKnockoutTicksPassed(revivalData.getLastKnockoutTicksPassed());
+                PlayerHardcoreRevivalManager.setKnockoutTicksPassed(player, PlayerHardcoreRevivalManager.getLastKnockoutTicksPassed(player));
             }
             final var multiplyTimerOnConsecutiveKnockout = HardcoreRevivalConfig.getActive().multiplyTimerOnConsecutiveKnockout;
             final var maxTicksUntilDeath = HardcoreRevivalConfig.getActive().secondsUntilDeath * 20;
-            final var ticksLeft = maxTicksUntilDeath - revivalData.getKnockoutTicksPassed();
+            final var ticksLeft = maxTicksUntilDeath - PlayerHardcoreRevivalManager.getKnockoutTicksPassed(player);
             final var newTicksLeft = (int) (ticksLeft * multiplyTimerOnConsecutiveKnockout);
-            revivalData.setKnockoutTicksPassed(maxTicksUntilDeath - newTicksLeft);
+            PlayerHardcoreRevivalManager.setKnockoutTicksPassed(player, maxTicksUntilDeath - newTicksLeft);
         }
 
         // Fire event for compatibility addons
@@ -92,14 +84,13 @@ public class HardcoreRevivalManager {
         updateKnockoutEffects(player);
     }
 
-    public void wakeup(Player player) {
+    public static void wakeup(Player player) {
         wakeup(player, true);
     }
 
-    public void wakeup(Player player, boolean applyEffects) {
-        final var revivalData = getRevivalData(player);
-        revivalData.setLastRescuedAt(System.currentTimeMillis());
-        revivalData.setLastKnockoutTicksPassed(revivalData.getKnockoutTicksPassed());
+    public static void wakeup(Player player, boolean applyEffects) {
+        PlayerHardcoreRevivalManager.setLastRescuedAt(player, System.currentTimeMillis());
+        PlayerHardcoreRevivalManager.setLastKnockoutTicksPassed(player, PlayerHardcoreRevivalManager.getKnockoutTicksPassed(player));
         reset(player);
 
         if (applyEffects) {
@@ -129,7 +120,7 @@ public class HardcoreRevivalManager {
         Balm.getEvents().fireEvent(new PlayerRevivedEvent(player));
     }
 
-    private int tryParseInt(@Nullable String text, int defaultVal) {
+    private static int tryParseInt(@Nullable String text, int defaultVal) {
         if (text != null) {
             try {
                 return Integer.parseInt(text);
@@ -140,9 +131,8 @@ public class HardcoreRevivalManager {
         return defaultVal;
     }
 
-    public void finishRescue(Player player) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        Player rescueTarget = revivalData.getRescueTarget();
+    public static void finishRescue(Player player) {
+        Player rescueTarget = PlayerHardcoreRevivalManager.getRescueTarget(player);
         if (rescueTarget != null) {
             MinecraftServer server = rescueTarget.getServer();
             if (server != null) {
@@ -152,7 +142,7 @@ public class HardcoreRevivalManager {
                 Balm.getNetworking().sendTo(rescueTarget, new RevivalSuccessMessage(rescueTarget.getId()));
                 Balm.getNetworking().sendToTracking(rescueTarget, new RevivalSuccessMessage(rescueTarget.getId()));
 
-                revivalData.setRescueTarget(null);
+                PlayerHardcoreRevivalManager.setRescueTarget(player, null);
 
                 Balm.getEvents().fireEvent(new PlayerRescuedEvent(rescueTarget, player));
             }
@@ -161,20 +151,19 @@ public class HardcoreRevivalManager {
         Balm.getHooks().setForcedPose(player, null);
     }
 
-    public void abortRescue(Player player) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        Player rescueTarget = revivalData.getRescueTarget();
+    public static void abortRescue(Player player) {
+        Player rescueTarget = PlayerHardcoreRevivalManager.getRescueTarget(player);
         if (rescueTarget != null) {
-            revivalData.setRescueTime(0);
-            revivalData.setRescueTarget(null);
+            PlayerHardcoreRevivalManager.setRescueTime(player, 0);
+            PlayerHardcoreRevivalManager.setRescueTarget(player, null);
             Balm.getNetworking().sendTo(player, new RevivalProgressMessage(-1, -1));
-            KnockoutSyncHandler.sendHardcoreRevivalData(rescueTarget, rescueTarget, getRevivalData(rescueTarget));
+            KnockoutSyncHandler.sendHardcoreRevivalData(rescueTarget, rescueTarget);
 
             Balm.getHooks().setForcedPose(player, null);
         }
     }
 
-    public void notRescuedInTime(Player player) {
+    public static void notRescuedInTime(Player player) {
         // Disable respawn invulnerability to prevent players from surviving knockout after login with offline timer enabled
         if (player instanceof ServerPlayerAccessor accessor) {
             accessor.setSpawnInvulnerableTime(0);
@@ -182,48 +171,43 @@ public class HardcoreRevivalManager {
 
         final var damageTypes = player.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
         final var damageSource = new DamageSource(damageTypes.getOrThrow(NOT_RESCUED_IN_TIME));
-        final var revivalData = getRevivalData(player);
-        revivalData.setLastKnockoutTicksPassed(0);
+        PlayerHardcoreRevivalManager.setLastKnockoutTicksPassed(player, 0);
         reset(player);
         player.hurt(damageSource, Float.MAX_VALUE);
     }
 
-    public void reset(Player player) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        revivalData.setKnockedOut(false);
-        revivalData.setKnockoutTicksPassed(0);
+    public static void reset(Player player) {
+        PlayerHardcoreRevivalManager.setKnockedOut(player, false);
+        PlayerHardcoreRevivalManager.setKnockoutTicksPassed(player, 0);
 
         updateKnockoutEffects(player);
     }
 
-    public void updateKnockoutEffects(Player player) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
+    public static void updateKnockoutEffects(Player player) {
         if (HardcoreRevivalConfig.getActive().glowOnKnockout) {
-            player.setGlowingTag(revivalData.isKnockedOut());
+            player.setGlowingTag(PlayerHardcoreRevivalManager.isKnockedOut(player));
         }
 
-        Balm.getHooks().setForcedPose(player, revivalData.isKnockedOut() ? Pose.FALL_FLYING : null);
+        Balm.getHooks().setForcedPose(player, PlayerHardcoreRevivalManager.isKnockedOut(player) ? Pose.FALL_FLYING : null);
 
-        KnockoutSyncHandler.sendHardcoreRevivalDataToWatching(player, revivalData);
+        KnockoutSyncHandler.sendHardcoreRevivalDataToWatching(player);
     }
 
-    public void startRescue(Player player, Player target) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        revivalData.setRescueTarget(target);
-        revivalData.setRescueTime(0);
+    public static void startRescue(Player player, Player target) {
+        PlayerHardcoreRevivalManager.setRescueTarget(player, target);
+        PlayerHardcoreRevivalManager.setRescueTime(player, 0);
         Balm.getNetworking().sendTo(player, new RevivalProgressMessage(target.getId(), 0.1f));
-        KnockoutSyncHandler.sendHardcoreRevivalData(target, target, getRevivalData(target), true);
+        KnockoutSyncHandler.sendHardcoreRevivalData(target, target, true);
 
         Balm.getHooks().setForcedPose(player, Pose.CROUCHING);
     }
 
-    public boolean isRescuing(Player player) {
-        HardcoreRevivalData revivalData = getRevivalData(player);
-        Player rescueTarget = revivalData.getRescueTarget();
+    public static boolean isRescuing(Player player) {
+        Player rescueTarget = PlayerHardcoreRevivalManager.getRescueTarget(player);
         return rescueTarget != null;
     }
 
-    boolean isKnockedOut(Player player) {
-        return getRevivalData(player).isKnockedOut();
+    public static boolean isKnockedOut(Player player) {
+        return PlayerHardcoreRevivalManager.isKnockedOut(player);
     }
 }

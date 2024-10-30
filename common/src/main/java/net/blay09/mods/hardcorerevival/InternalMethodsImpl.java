@@ -8,22 +8,22 @@ import net.minecraft.world.damagesource.DamageSource;
 public class InternalMethodsImpl implements InternalMethods {
     @Override
     public void knockout(ServerPlayer player, DamageSource damageSource) {
-        HardcoreRevival.getManager().knockout(player, damageSource);
+        HardcoreRevivalManager.knockout(player, damageSource);
     }
 
     @Override
     public void wakeup(ServerPlayer player, boolean applyEffects) {
-        HardcoreRevival.getManager().wakeup(player, applyEffects);
+        HardcoreRevivalManager.wakeup(player, applyEffects);
     }
 
     @Override
     public boolean isKnockedOut(ServerPlayer player) {
-        return HardcoreRevival.getManager().isKnockedOut(player);
+        return PlayerHardcoreRevivalManager.isKnockedOut(player);
     }
 
     @Override
     public int getKnockoutTicksPassed(ServerPlayer player) {
-        return HardcoreRevival.getManager().getRevivalData(player).getKnockoutTicksPassed();
+        return PlayerHardcoreRevivalManager.getKnockoutTicksPassed(player);
     }
 
     @Override
