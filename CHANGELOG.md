@@ -1,1 +1,3 @@
-- Updated to Minecraft 1.21.2
+- Fixed the mod not working at all on NeoForge
+- Fixed Totem of Undying resulting in instant death
+- Added support for Inventory Totem mod
