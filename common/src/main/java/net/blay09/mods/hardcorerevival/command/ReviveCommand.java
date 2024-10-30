@@ -3,7 +3,7 @@ package net.blay09.mods.hardcorerevival.command;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import net.blay09.mods.hardcorerevival.HardcoreRevival;
+import net.blay09.mods.hardcorerevival.HardcoreRevivalManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -27,7 +27,7 @@ public class ReviveCommand {
     private static int reviveEntities(CommandSourceStack source, Collection<? extends Entity> targets, boolean skipEffects) {
         for (Entity entity : targets) {
             if (entity instanceof Player player) {
-                HardcoreRevival.getManager().wakeup(player, !skipEffects);
+                HardcoreRevivalManager.wakeup(player, !skipEffects);
             }
         }
 

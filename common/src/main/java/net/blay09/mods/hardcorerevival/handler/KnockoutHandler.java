@@ -4,8 +4,8 @@ package net.blay09.mods.hardcorerevival.handler;
 import net.blay09.mods.balm.api.Balm;
 import net.blay09.mods.balm.api.event.*;
 import net.blay09.mods.hardcorerevival.HardcoreRevival;
+import net.blay09.mods.hardcorerevival.PlayerHardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.api.PlayerAboutToKnockOutEvent;
-import net.blay09.mods.hardcorerevival.capability.HardcoreRevivalData;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.HardcoreRevivalManager;
 import net.minecraft.core.registries.Registries;
@@ -33,7 +33,7 @@ public class KnockoutHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             DamageSource damageSource = event.getDamageSource();
 
-            if (HardcoreRevival.getRevivalData(event.getEntity()).isKnockedOut()) {
+            if (PlayerHardcoreRevivalManager.isKnockedOut(player)) {
                 Entity attacker = damageSource.getEntity();
                 if (attacker instanceof Mob mob) {
                     mob.setTarget(null);
@@ -51,7 +51,7 @@ public class KnockoutHandler {
 
                 if (!aboutToKnockOutEvent.isCanceled()) {
                     event.setDamageAmount(Math.min(event.getDamageAmount(), Math.max(0f, player.getHealth() - 1f)));
-                    HardcoreRevival.getManager().knockout(player, damageSource);
+                    HardcoreRevivalManager.knockout(player, damageSource);
                 }
             }
         }
@@ -95,26 +95,25 @@ public class KnockoutHandler {
 
     public static void onPlayerTick(ServerPlayer player) {
         //if (event.phase == TickEvent.Phase.START && event.side == LogicalSide.SERVER) {
-        HardcoreRevivalData revivalData = HardcoreRevival.getRevivalData(player);
-        if (revivalData.isKnockedOut() && player.isAlive()) {
+        if (PlayerHardcoreRevivalManager.isKnockedOut(player) && player.isAlive()) {
             // Make sure health stays locked at half a heart
             player.setHealth(1f);
 
-            revivalData.setKnockoutTicksPassed(revivalData.getKnockoutTicksPassed() + 1);
+            PlayerHardcoreRevivalManager.setKnockoutTicksPassed(player, PlayerHardcoreRevivalManager.getKnockoutTicksPassed(player) + 1);
 
             if (player.tickCount % 20 == 0) {
-                Balm.getHooks().setForcedPose(player, revivalData.isKnockedOut() ? Pose.FALL_FLYING : null);
+                Balm.getHooks().setForcedPose(player, PlayerHardcoreRevivalManager.isKnockedOut(player) ? Pose.FALL_FLYING : null);
             }
 
             int maxTicksUntilDeath = HardcoreRevivalConfig.getActive().secondsUntilDeath * 20;
-            if (maxTicksUntilDeath > 0 && revivalData.getKnockoutTicksPassed() >= maxTicksUntilDeath) {
-                HardcoreRevival.getManager().notRescuedInTime(player);
+            if (maxTicksUntilDeath > 0 && PlayerHardcoreRevivalManager.getKnockoutTicksPassed(player) >= maxTicksUntilDeath) {
+                HardcoreRevivalManager.notRescuedInTime(player);
             }
         }
     }
 
     public static void onPlayerRespawn(PlayerRespawnEvent event) {
-        HardcoreRevival.getManager().reset(event.getNewPlayer());
+        HardcoreRevivalManager.reset(event.getNewPlayer());
     }
 
 

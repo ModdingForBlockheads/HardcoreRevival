@@ -1,7 +1,7 @@
 package net.blay09.mods.hardcorerevival.network;
 
 import net.blay09.mods.hardcorerevival.HardcoreRevival;
-import net.blay09.mods.hardcorerevival.capability.HardcoreRevivalData;
+import net.blay09.mods.hardcorerevival.PlayerHardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.client.HardcoreRevivalClient;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -44,11 +44,9 @@ public class HardcoreRevivalDataMessage implements CustomPacketPayload {
     public static void handle(Player player, HardcoreRevivalDataMessage message) {
         if (player != null) {
             Entity entity = player.level().getEntity(message.entityId);
-            if (entity != null) {
-                HardcoreRevivalData revivalData = entity.getId() == player.getId() ? HardcoreRevival.getClientRevivalData() : HardcoreRevival.getRevivalData(
-                        entity);
-                revivalData.setKnockedOut(message.knockedOut);
-                revivalData.setKnockoutTicksPassed(message.knockoutTicksPassed);
+            if (entity instanceof Player targetEntity) {
+                PlayerHardcoreRevivalManager.setKnockedOut(targetEntity, message.knockedOut);
+                PlayerHardcoreRevivalManager.setKnockoutTicksPassed(targetEntity, message.knockoutTicksPassed);
                 HardcoreRevivalClient.setBeingRescued(message.beingRescued);
             }
         }
