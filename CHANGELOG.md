@@ -1,3 +1,3 @@
-- Reduced default rescueDistance to 3 instead of 5
-- Require Line of Sight for rescuing to initiate
-- Require the player to be looking towards the downed player for rescuing to initiate
+- Fixed the mod not working at all on NeoForge
+- Fixed Totem of Undying resulting in instant death
+- Added support for Inventory Totem mod
