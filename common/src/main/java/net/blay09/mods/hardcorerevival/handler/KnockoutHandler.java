@@ -8,10 +8,11 @@ import net.blay09.mods.hardcorerevival.api.PlayerAboutToKnockOutEvent;
 import net.blay09.mods.hardcorerevival.capability.HardcoreRevivalData;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.HardcoreRevivalManager;
-import net.blay09.mods.hardcorerevival.mixin.LivingEntityAccessor;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -45,20 +46,27 @@ public class KnockoutHandler {
 
             boolean wouldDie = player.getHealth() - event.getDamageAmount() <= 0f;
             if (wouldDie && isKnockoutEnabledFor(player, damageSource)) {
-                // Reduce damage to prevent the player from dying
-                event.setDamageAmount(Math.min(event.getDamageAmount(), Math.max(0f, player.getHealth() - 1f)));
-
                 final var aboutToKnockOutEvent = new PlayerAboutToKnockOutEvent(player, damageSource);
                 Balm.getEvents().fireEvent(aboutToKnockOutEvent);
 
-                // Trigger knockout for this player, if totem does not protect player
-                if (aboutToKnockOutEvent.isCanceled() || ((LivingEntityAccessor) player).callCheckTotemDeathProtection(damageSource)) {
-                    aboutToKnockOutEvent.setCanceled(true);
-                } else {
+                if (!aboutToKnockOutEvent.isCanceled()) {
+                    event.setDamageAmount(Math.min(event.getDamageAmount(), Math.max(0f, player.getHealth() - 1f)));
                     HardcoreRevival.getManager().knockout(player, damageSource);
                 }
             }
         }
+    }
+
+    private static boolean holdsDeathProtectionItem(ServerPlayer player) {
+        for (final var hand : InteractionHand.values()) {
+            final var itemStack = player.getItemInHand(hand);
+            final var deathProtection = itemStack.get(DataComponents.DEATH_PROTECTION);
+            if (deathProtection != null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static boolean isKnockoutEnabledFor(ServerPlayer player, DamageSource damageSource) {
@@ -76,6 +84,10 @@ public class KnockoutHandler {
         if (HardcoreRevivalConfig.getActive().disableInSingleplayer && server.isSingleplayer() && server.getPlayerCount() == 1) {
             return false;
         } else if (HardcoreRevivalConfig.getActive().disableInLonelyMultiplayer && !server.isSingleplayer() && server.getPlayerCount() == 1) {
+            return false;
+        }
+
+        if (holdsDeathProtectionItem(player)) {
             return false;
         }
 
