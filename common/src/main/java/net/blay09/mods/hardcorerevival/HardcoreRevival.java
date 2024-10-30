@@ -39,6 +39,7 @@ public class HardcoreRevival {
         RescueHandler.initialize();
 
         Balm.initializeIfLoaded(Compat.MR_CRAYFISHS_GUN_MOD, "net.blay09.mods.hardcorerevival.compat.MrCrayfishsGunModAddon");
+        Balm.initializeIfLoaded(Compat.INVENTORY_TOTEM, "new.blay09.mods.hardcorerevival.compat.InventoryTotemAddon");
     }
 
     public static HardcoreRevivalManager getManager() {
