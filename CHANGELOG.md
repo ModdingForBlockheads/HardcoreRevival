@@ -1,3 +1,1 @@
-- Fixed the mod not working at all on NeoForge
-- Fixed Totem of Undying resulting in instant death
-- Added support for Inventory Totem mod
+- Fixed crash on revival
