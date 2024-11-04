@@ -69,10 +69,11 @@ public class PlayerHardcoreRevivalManager {
         return getRevivalDataProvider(player.level()).getRescueTime(player);
     }
 
-    public static void setRescueTarget(Player player, Player rescueTarget) {
+    public static void setRescueTarget(Player player, @Nullable Player rescueTarget) {
         getRevivalDataProvider(player.level()).setRescueTarget(player, rescueTarget);
     }
 
+    @Nullable
     public static Player getRescueTarget(Player player) {
         return getRevivalDataProvider(player.level()).getRescueTarget(player);
     }
