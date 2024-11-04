@@ -3,6 +3,7 @@ package net.blay09.mods.hardcorerevival;
 import net.blay09.mods.balm.api.Balm;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class PersistentRevivalDataProvider implements RevivalDataProvider {
 
@@ -93,8 +94,12 @@ public class PersistentRevivalDataProvider implements RevivalDataProvider {
     }
 
     @Override
-    public void setRescueTarget(Player player, Player rescueTarget) {
-        getRevivalData(player).putUUID(RESCUE_TARGET, rescueTarget.getGameProfile().getId());
+    public void setRescueTarget(Player player, @Nullable Player rescueTarget) {
+        if (rescueTarget != null) {
+            getRevivalData(player).putUUID(RESCUE_TARGET, rescueTarget.getGameProfile().getId());
+        } else {
+            getRevivalData(player).remove(RESCUE_TARGET);
+        }
     }
 
     @Override

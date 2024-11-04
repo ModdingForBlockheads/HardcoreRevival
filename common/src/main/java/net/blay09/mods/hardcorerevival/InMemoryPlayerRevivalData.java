@@ -1,6 +1,7 @@
 package net.blay09.mods.hardcorerevival;
 
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 class InMemoryPlayerRevivalData {
     private boolean knockedOut;
@@ -68,11 +69,12 @@ class InMemoryPlayerRevivalData {
         this.rescueTime = rescueTime;
     }
 
+    @Nullable
     public Player getRescueTarget() {
         return rescueTarget;
     }
 
-    public void setRescueTarget(Player rescueTarget) {
+    public void setRescueTarget(@Nullable Player rescueTarget) {
         this.rescueTarget = rescueTarget;
     }
 }

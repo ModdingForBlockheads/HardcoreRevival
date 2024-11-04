@@ -1,6 +1,7 @@
 package net.blay09.mods.hardcorerevival;
 
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class InMemoryRevivalDataProvider implements RevivalDataProvider {
     }
 
     @Override
-    public void setRescueTarget(Player player, Player rescueTarget) {
+    public void setRescueTarget(Player player, @Nullable Player rescueTarget) {
         getPlayerData(player).setRescueTarget(rescueTarget);
     }
 
