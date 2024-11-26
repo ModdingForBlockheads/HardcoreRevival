@@ -1,1 +1,1 @@
-- Fixed crash on revival
+- Updated to Minecraft 1.21.4
