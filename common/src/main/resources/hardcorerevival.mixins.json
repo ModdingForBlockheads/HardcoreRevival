@@ -8,7 +8,6 @@
     "EntityMixin",
     "PlayerMixin",
     "ServerPlayNetHandlerMixin",
-    "ServerPlayerAccessor",
     "LivingEntityMixin",
     "LivingEntityAccessor"
   ],

@@ -7,7 +7,6 @@ import net.blay09.mods.hardcorerevival.api.PlayerRevivedEvent;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfigData;
 import net.blay09.mods.hardcorerevival.handler.KnockoutSyncHandler;
-import net.blay09.mods.hardcorerevival.mixin.ServerPlayerAccessor;
 import net.blay09.mods.hardcorerevival.network.RevivalProgressMessage;
 import net.blay09.mods.hardcorerevival.network.RevivalSuccessMessage;
 import net.blay09.mods.hardcorerevival.stats.ModStats;
@@ -164,11 +163,6 @@ public class HardcoreRevivalManager {
     }
 
     public static void notRescuedInTime(Player player) {
-        // Disable respawn invulnerability to prevent players from surviving knockout after login with offline timer enabled
-        if (player instanceof ServerPlayerAccessor accessor) {
-            accessor.setSpawnInvulnerableTime(0);
-        }
-
         final var damageTypes = player.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
         final var damageSource = new DamageSource(damageTypes.getOrThrow(NOT_RESCUED_IN_TIME));
         PlayerHardcoreRevivalManager.setLastKnockoutTicksPassed(player, 0);
