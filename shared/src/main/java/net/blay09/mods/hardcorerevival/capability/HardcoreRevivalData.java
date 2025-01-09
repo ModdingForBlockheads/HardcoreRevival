@@ -27,4 +27,8 @@ public interface HardcoreRevivalData {
     CompoundTag serialize();
 
     void deserialize(CompoundTag tag);
+
+    void setKnockoutStartTime(long knockoutStartTime);
+
+    long getKnockoutStartTime();
 }

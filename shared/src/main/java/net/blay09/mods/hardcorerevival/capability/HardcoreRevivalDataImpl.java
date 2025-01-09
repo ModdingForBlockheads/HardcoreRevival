@@ -7,12 +7,14 @@ public class HardcoreRevivalDataImpl implements HardcoreRevivalData {
 	private static final String KNOCKED_OUT = "KnockedOut";
 	private static final String KNOCKOUT_TICKS_PASSED = "KnockoutTicksPassed";
 	private static final String LOGOUT_WORLD_TIME = "LogoutWorldTime";
+	private static final String KNOCKOUT_START_TIME = "KnockoutStartTime";
 
 	private boolean knockedOut;
 	private int knockoutTicksPassed;
 	private long logoutWorldTime;
 	private int rescueTime;
 	private Player rescueTarget;
+	private long knockoutStartTime;
 
 	@Override
 	public void setKnockedOut(boolean knockedOut) {
@@ -65,11 +67,22 @@ public class HardcoreRevivalDataImpl implements HardcoreRevivalData {
 	}
 
 	@Override
+	public void setKnockoutStartTime(long knockoutStartTime) {
+		this.knockoutStartTime = knockoutStartTime;
+	}
+
+	@Override
+	public long getKnockoutStartTime() {
+		return knockoutStartTime;
+	}
+
+	@Override
 	public CompoundTag serialize() {
 		CompoundTag tagCompound = new CompoundTag();
 		tagCompound.putBoolean(KNOCKED_OUT, isKnockedOut());
 		tagCompound.putInt(KNOCKOUT_TICKS_PASSED, getKnockoutTicksPassed());
 		tagCompound.putLong(LOGOUT_WORLD_TIME, getLogoutWorldTime());
+		tagCompound.putLong(KNOCKOUT_START_TIME, getKnockoutStartTime());
 		return tagCompound;
 	}
 
@@ -78,5 +91,6 @@ public class HardcoreRevivalDataImpl implements HardcoreRevivalData {
 		setKnockedOut(tag.getBoolean(KNOCKED_OUT));
 		setKnockoutTicksPassed(tag.getInt(KNOCKOUT_TICKS_PASSED));
 		setLogoutWorldTime(tag.getLong(LOGOUT_WORLD_TIME));
+		setKnockoutStartTime(tag.getLong(KNOCKOUT_START_TIME));
 	}
 }

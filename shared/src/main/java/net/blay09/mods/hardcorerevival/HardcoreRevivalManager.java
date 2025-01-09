@@ -193,4 +193,10 @@ public class HardcoreRevivalManager {
     boolean isKnockedOut(Player player) {
         return getRevivalData(player).isKnockedOut();
     }
+
+    public void execute(Player player) {
+        reset(player);
+        // Apply any necessary effects or actions for execution
+        player.hurt(DamageSource.GENERIC, Float.MAX_VALUE);
+    }
 }

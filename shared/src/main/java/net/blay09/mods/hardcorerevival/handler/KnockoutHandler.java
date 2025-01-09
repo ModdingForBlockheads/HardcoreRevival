@@ -38,7 +38,10 @@ public class KnockoutHandler {
                 if (attacker instanceof Mob mob) {
                     mob.setTarget(null);
                 }
-                if (!damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(HardcoreRevivalManager.NOT_RESCUED_IN_TIME)) {
+                HardcoreRevivalData revivalData = HardcoreRevival.getRevivalData(player);
+                if (revivalData.getKnockoutTicksPassed() >= 100) { // 5 seconds = 100 ticks
+                    HardcoreRevival.getManager().execute(player);
+                } else if (!damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(HardcoreRevivalManager.NOT_RESCUED_IN_TIME)) {
                     event.setCanceled(true);
                 }
                 return;
