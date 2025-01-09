@@ -62,4 +62,13 @@ public class InvalidHardcoreRevivalData implements HardcoreRevivalData {
     @Override
     public void deserialize(CompoundTag tag) {
     }
+
+    @Override
+    public void setKnockoutStartTime(long knockoutStartTime) {
+    }
+
+    @Override
+    public long getKnockoutStartTime() {
+        return 0;
+    }
 }

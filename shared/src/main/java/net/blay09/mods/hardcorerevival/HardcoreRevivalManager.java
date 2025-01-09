@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -197,6 +198,6 @@ public class HardcoreRevivalManager {
     public void execute(Player player) {
         reset(player);
         // Apply any necessary effects or actions for execution
-        player.hurt(DamageSource.GENERIC, Float.MAX_VALUE);
+        // TODO: need to have the "Executed" damage source.
     }
 }
