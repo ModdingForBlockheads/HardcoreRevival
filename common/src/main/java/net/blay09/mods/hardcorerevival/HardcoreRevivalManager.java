@@ -35,6 +35,7 @@ public class HardcoreRevivalManager {
             return;
         }
 
+        player.closeContainer();
         player.stopUsingItem();
         player.stopRiding();
         player.removeEffect(MobEffects.REGENERATION);
