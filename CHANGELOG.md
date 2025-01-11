@@ -1,1 +1,1 @@
-- Updated to Minecraft 1.21.4
+- Fixed villagers refusing to trade when you get knocked out while trading
