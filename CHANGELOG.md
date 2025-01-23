@@ -1,1 +1,1 @@
-- Fixed villagers refusing to trade when you get knocked out while trading
+- Possibly fixed an issue where the screen goes black in menus sometimes
