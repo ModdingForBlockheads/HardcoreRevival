@@ -12,7 +12,6 @@ import net.blay09.mods.hardcorerevival.PlayerHardcoreRevivalManager;
 import net.blay09.mods.hardcorerevival.config.HardcoreRevivalConfig;
 import net.blay09.mods.hardcorerevival.network.RescueMessage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -67,8 +66,7 @@ public class HardcoreRevivalClient {
     }
 
     public static void onGuiDrawPost(GuiDrawEvent.Post event) {
-        GuiGraphics guiGraphics = event.getGuiGraphics();
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        final var guiGraphics = event.getGuiGraphics();
 
         if (event.getElement() == GuiDrawEvent.Element.ALL) {
             Minecraft mc = Minecraft.getInstance();
@@ -76,6 +74,7 @@ public class HardcoreRevivalClient {
                 var poseStack = guiGraphics.pose();
                 poseStack.pushPose();
                 poseStack.translate(0, 0, -300);
+                RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
                 GuiHelper.drawGradientRectW(guiGraphics, 0, 0, mc.getWindow().getWidth(), mc.getWindow().getHeight(), 0x60500000, 0x90FF0000);
                 poseStack.popPose();
 
@@ -91,6 +90,8 @@ public class HardcoreRevivalClient {
                         guiGraphics.drawCenteredString(mc.font, openDeathScreenText, width / 2, height / 2 + 25, 0xFFFFFFFF);
                     }
                 }
+
+                RenderSystem.enableBlend();
             } else {
                 if (targetEntity != -1 && targetProgress > 0) {
                     Entity entity = mc.level.getEntity(targetEntity);
@@ -103,12 +104,14 @@ public class HardcoreRevivalClient {
                         } else if (targetProgress >= 0.25f) {
                             textComponent.append(" .");
                         }
+                        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
                         guiGraphics.drawString(mc.font,
                                 textComponent,
                                 mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(textComponent) / 2,
                                 mc.getWindow().getGuiScaledHeight() / 2 + 30,
                                 0xFFFFFFFF,
                                 true);
+                        RenderSystem.enableBlend();
                     }
                 }
 
@@ -118,18 +121,19 @@ public class HardcoreRevivalClient {
                             pointedEntity) <= HardcoreRevivalConfig.getActive().rescueDistance) {
                         Component rescueKeyText = mc.options.keyUse.getTranslatedKeyMessage();
                         var textComponent = Component.translatable("gui.hardcorerevival.hold_to_rescue", rescueKeyText);
+                        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
                         guiGraphics.drawString(mc.font,
                                 textComponent,
                                 mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(textComponent) / 2,
                                 mc.getWindow().getGuiScaledHeight() / 2 + 30,
                                 0xFFFFFFFF,
                                 true);
+                        RenderSystem.enableBlend();
                     }
                 }
             }
-
-            // Other mods start rendering weirdly if blend is not enabled at the end
-            RenderSystem.enableBlend();
+        } else if (event.getElement() == GuiDrawEvent.Element.HEALTH && isKnockedOut()) {
+            RenderSystem.setShaderColor(1f, 1f, 1, 1f);
         }
     }
 
