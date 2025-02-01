@@ -1,1 +1,1 @@
-- Fixed crash on revival
+- Added support for Charm of Undying and other mods supporting Totem of Undying in Curios or Trinkets
