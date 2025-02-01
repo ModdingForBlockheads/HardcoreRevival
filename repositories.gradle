@@ -72,4 +72,11 @@ repositories {
             includeGroup "org.ladysnake.cardinal-components-api"
         }
     }
+
+    maven {
+        url = "https://maven.theillusivec4.top/"
+        content {
+            includeGroup "top.theillusivec4.curios"
+        }
+    }
 }

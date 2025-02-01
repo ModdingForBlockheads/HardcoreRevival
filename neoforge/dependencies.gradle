@@ -2,4 +2,5 @@ dependencies {
     implementation("net.blay09.mods:balm-neoforge:${balm_version}") {
         changing = balm_version.contains("SNAPSHOT")
     }
+    compileOnly("top.theillusivec4.curios:curios-neoforge:9.2.2+1.21.1:api")
 }
